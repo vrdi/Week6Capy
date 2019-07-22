@@ -8,6 +8,7 @@ Created on Mon Jul 22 10:21:28 2019
 import geopandas as gpd
 import pandas as pd
 import numpy as np
+import scipy
 
 import random
 
@@ -47,12 +48,14 @@ from gerrychain import (
 
 from gerrychain.tree import recursive_tree_part
 
+import capy
+
 
 
 
 def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_districts, initial_plan, num_steps, pop_tol = 0.05, min_win_thresh = 0.5):
     my_updaters = {
-        "population": Tally(tot_pop_col),
+        "population": Tally(tot_pop_col, alias = "population"),
         "cut_edges": cut_edges,
         "maj-min": Election("maj-min", {"maj": maj_pop_col, "min": min_pop_col}),
     }
@@ -63,7 +66,7 @@ def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_dis
     popbound = within_percent_of_ideal_population(initial_partition, 0.1)
     
     # ########Setup Proposal
-    ideal_population = sum(initial_partition[tot_pop_col].values()) / len(initial_partition)
+    ideal_population = sum(initial_partition["population"].values()) / len(initial_partition)
     
     tree_proposal = partial(
         recom,
@@ -95,5 +98,44 @@ def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_dis
     
     return [cut_edges_list,min_seats_list,min_percents_list]
     
+
+
+def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
+    adj_mat = nx.to_numpy_array(graph)
+    min_vect = np.array(graph.node(data=min_pop_col))[:,1]  #pull out the minority populations and convert them to a vector
+    maj_vect = np.array(graph.node(data=maj_pop_col))[:,1]  #pull out the majority populations and convert them to a vector
+    edge_score = capy.edge(min_vect, maj_vect, adj_mat)
+    half_edge_score = capy.half_edge(min_vect, maj_vect, adj_mat)
     
+    output = {}
+    output["edge"] = edge_score
+    output["half_edge"] = half_edge_score
     
+    return output
+
+
+graph = nx.grid_graph([10,10])
+
+
+for vertex in graph.nodes():
+    graph.node[vertex]["population"] = 1
+    graph.node[vertex]["pink"] = 0
+    graph.node[vertex]["purple"] = 1
+
+    
+for i in rnd.choice(range(len(graph.nodes)),size=40,replace=False):
+    vertex = list(graph.nodes)[i]
+    graph.node[vertex]["purple"] = 0
+    graph.node[vertex]["pink"] = 1
+    
+cdict = {1: "pink", 0: "purple"}
+
+plt.figure()
+nx.draw(
+    graph,
+    pos={x: x for x in graph.nodes()},
+    node_color=[cdict[graph.node[x]["pink"]] for x in graph.nodes()],
+    node_size=ns,
+    node_shape="s",
+)
+plt.show()
