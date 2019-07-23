@@ -145,6 +145,17 @@ def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
     return output
 
 
+def randomly_populate_grid_fraction_one_per_node(m, n, min_pop_col, maj_pop_col, minority_fraction, tot_pop_col = None):
+    return randomly_populate_grid_fraction(m, n, min_pop_col, maj_pop_col, minority_fraction, m*n, tot_pop_col)
+
+def randomly_populate_grid_fraction(m, n, min_pop_col, maj_pop_col, minority_fraction, total_pop, tot_pop_col = None, no_empty_nodes = True):
+    graph = nx.grid_graph([m,n])
+    return randomly_populate_graph_fraction(graph, min_pop_col, maj_pop_col, minority_fraction, total_pop, tot_pop_col, no_empty_nodes)
+
+def randomly_populate_grid(m, n, min_pop_col, maj_pop_col, num_minority, num_majority, tot_pop_col = None, no_empty_nodes = True):
+    graph = nx.grid_graph([m,n])
+    return randomly_populate_graph(graph, min_pop_col, maj_pop_col, num_minority, num_majority, tot_pop_col, no_empty_nodes)
+
 def randomly_populate_graph_fraction(graph, min_pop_col, maj_pop_col, minority_fraction, total_pop, tot_pop_col = None, no_empty_nodes = True):
     num_minority = math.floor(minority_fraction*total_pop)
     num_majority = math.ceil((1-minority_fraction)*total_pop)
