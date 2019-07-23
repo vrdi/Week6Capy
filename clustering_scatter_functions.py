@@ -5,37 +5,11 @@ Created on Mon Jul 22 10:21:28 2019
 @author: Brian
 """
 
-import geopandas as gpd
-import pandas as pd
-import numpy as np
-import scipy
-
-import random
-
-import matplotlib.pyplot as plt
-from functools import partial
-import networkx as nx
-
-from gerrychain import MarkovChain
-from gerrychain.constraints import (
-    Validator,
-    single_flip_contiguous,
-    within_percent_of_ideal_population,
-)
-from gerrychain.proposals import propose_random_flip
+from gerrychain.metrics import efficiency_gap, mean_median, partisan_gini
+from gerrychain.proposals import recom, propose_random_flip
+from gerrychain.tree import recursive_tree_part
 from gerrychain.accept import always_accept
 from gerrychain.updaters import Election, Tally, cut_edges
-from gerrychain.partition import Partition
-from gerrychain.proposals import recom
-from gerrychain.metrics import mean_median, efficiency_gap
-
-import csv
-import os
-from functools import partial
-import json
-
-import matplotlib.pyplot as plt
-
 from gerrychain import (
     Election,
     Graph,
@@ -45,13 +19,15 @@ from gerrychain import (
     constraints,
     updaters,
 )
-
-from gerrychain.tree import recursive_tree_part
-
+from gerrychain.constraints import (
+    Validator,
+    single_flip_contiguous,
+    within_percent_of_ideal_population,
+)
+from functools import partial
+import numpy as np
+import networkx as nx
 import capy
-
-
-
 
 def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_districts, initial_plan, num_steps, pop_tol = 0.05, min_win_thresh = 0.5):
     my_updaters = {
