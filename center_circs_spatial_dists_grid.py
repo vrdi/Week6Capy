@@ -1,18 +1,6 @@
-# Template by Sarah Cannon
-# Based on simple_chain.py by Darryl DeFord
+#central blobs
 
-
-import random 
-import pickle
-
-# import matplotlib
-# matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
-import itertools
-
+#version #2
 
 # BUILD GRAPH
 n = 10 # side length of grid
@@ -43,14 +31,13 @@ dual_graph_list.append(graph)
 # The voter configuration called Henry :total
 for vertex in graph.nodes():
     # For 10 x 10 grid
-    Henry = [[1,1,1,1,0,0,0,0,0,0],[1,1,1,1,0,0,0,0,0,0], [1,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1]]
+    Henry = [[1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,1],[1,0,1,1,0,0,1,1,0,1],[1,0,1,1,0,0,1,1,0,1],[1,0,1,1,0,0,1,1,0,1], [1,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1]]
     if Henry[9-vertex[1]][vertex[0]] == 0:
         graph.node[vertex]["MINPOP"] = 0
         graph.node[vertex]["MAJPOP"] = 1
     else:
         graph.node[vertex]["MINPOP"] = 1
-        graph.node[vertex]["MAJPOP"] = 0 
+        graph.node[vertex]["MAJPOP"] = 0  
 
 dual_graph_list.append(graph)  
          
@@ -61,14 +48,13 @@ nx.draw(graph, pos={x: x for x in graph.nodes()},
                     node_size=80,
                     node_shape="o",)
 
-
 gr = graph
 
 print(nx.diameter(gr))
 
 node_scores = []
 r = 1/2
-a = 1/(((1-(r)**nx.diameter(gr))/(1-r))-1)
+a = 1/(((1-(r)**nx.diameter(gr))/((1-r)))-1)
 
 for node in gr.nodes:
    if gr.node[node]["MINPOP"] == 1:
