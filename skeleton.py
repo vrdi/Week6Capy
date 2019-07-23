@@ -2,7 +2,6 @@
 # Muniba & Kristen, 7/23/19
 
 # Import and Setup Block
-
 from networkx.readwrite import json_graph
 from gerrychain import Graph
 import matplotlib.pyplot as plt
@@ -51,26 +50,51 @@ for state in range (num_states):
     graph.to_json("ia_json.json")
     jgraph = Graph.from_json("ia_json.json")
     df = gpd.read_file(graph_path)
-    
+
     # set parameters for ensemble
     min_pop_col = 'PRES00R'
     maj_pop_col = 'PRES00D'
     tot_pop_col = 'TOTVOT00'
     num_districts = 4
     initial_plan = Partition(jgraph, "CD")
-    num_steps = 10
+    num_steps = 100
+    
+    while True:
+        
+        # run ensemble and store outputs
+        output = run_ensemble_on_distro(jgraph, min_pop_col, maj_pop_col, tot_pop_col, num_districts, initial_plan, num_steps) 
+        cut_edges_list = output[0]
+        min_seats_list = output[1]
+        min_percents_list = output[2] 
+
+        # verify appropriate mixing time
+        half_of_cut_edges = []
+        for i in range (int(len(cut_edges_list)/2)):
+            half_of_cut_edges.append(cut_edges_list[i])
+            half_of_cut_edges.append(cut_edges_list[i])
+
+        plt.hist(cut_edges_list, bins=25, alpha=0.5, label='all steps in chain')
+        plt.hist(half_of_cut_edges, bins=25, alpha=0.5, label='first 1/2 of steps')
+        plt.xlabel("# of cut edges")
+        plt.ylabel("frequency")
+        plt.legend(loc='upper right')
+        plt.show()
+
+        is_mixed = input('Is the appropriate mixing time met? (Y/N) ')
+
+        if(is_mixed == 'Y'):
+            break
+
+        elif(is_mixed == 'N'):
+            num_steps = int(input('Reset number of steps for chain: '))
 
     dual_graph_list.append(jgraph)
     
-    # run ensemble and store outputs
-    output = run_ensemble_on_distro(jgraph, min_pop_col, maj_pop_col, tot_pop_col, num_districts, initial_plan, num_steps) 
-    cut_edges_list = output[0]
-    min_seats_list = output[1]
-    min_percents_list = output[2] 
-
     # plot number of minority seats in each step of chain
     plt.figure()
     plt.hist(min_seats_list, bins=20)
+    plt.xlabel("# of minority seats")
+    plt.ylabel("frequency")
     plt.show()
     plt.savefig("./capy_hist.png")
     plt.close()
