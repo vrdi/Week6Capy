@@ -54,6 +54,26 @@ import capy
 
 
 def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_districts, initial_plan, num_steps, pop_tol = 0.05, min_win_thresh = 0.5):
+    """Runs a Recom chain on a given graph with a given minority/majority population distribution and returns lists of cut edges, minority seat wins, and tuples of minority percentage by district for each step of the chain.
+    
+    Parameters:
+    graph (networkx.Graph) -- a NetworkX graph object representing the dual graph on which to run the chain. The nodes should have attributes for majority population, minority population, and total population.
+    min_pop_col (string) -- the key/column name for the minority population attribute in graph
+    maj_pop_col (string) -- the key/column name for the majority population attribute in graph
+    tot_pop_col (string) -- the key/column name for the total population attribute in graph
+    num_districts (int) -- number of districts to run for the chain
+    initial_plan (gerrychain.Partition) -- an initial partition for the chain (which does not need updaters since the function will supply its own updaters)
+    num_steps (int) -- the number of steps for which to run the chain
+    pop_tol (float) -- tolerance for deviation from perfectly balanced populations between districts (default 0.05)
+    min_win_thresh -- percent of minority population needed in a district for it to be considered a minority win. If the minority percentage in a district is greater than or equal to min_win_thresh then that district is considered a minority win. (default 0.5)
+    
+    Returns:
+    [cut_edges_list,min_seats_list,min_percents_list] (list)
+        WHERE
+        cut_edges_list (list) -- list where cut_edges_list[i] is the number of cut edges in the partition at step i of the Markov chain
+        min_seats_list -- list where min_seats_list[i] is the number of districts won by the minority (according to min_win_thresh) at step i of the chain
+        min_percents_list -- list where min_percents_list[i] is a tuple, with min_percents_list[i][j] being the minority percentage in district j at step i of the chain
+    """
     my_updaters = {
         "population": Tally(tot_pop_col, alias = "population"),
         "cut_edges": cut_edges,
@@ -101,6 +121,17 @@ def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_dis
 
 
 def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
+    """Returns a dictionary of various clustering scores for given graph with a given minority/majority population distribution
+    
+    Parameters:
+    graph (networkx.Graph) -- a NetworkX graph object representing the dual graph on which to run the chain. The nodes should have attributes for majority population, minority population, and total population.
+    min_pop_col (string) -- the key/column name for the minority population attribute in graph
+    maj_pop_col (string) -- the key/column name for the majority population attribute in graph
+    tot_pop_col (string) -- the key/column name for the total population attribute in graph
+    
+    Returns:
+    output (dict) -- dictionary where the keys are the names of clustering scores as strings (currently the options are "edge" and "half_edge") and the value for a key is the evaluation of the specified clustering score on the graph and its population distribution
+    """
     adj_mat = nx.to_numpy_array(graph, weight=None)
     min_vect = np.array(graph.node(data=min_pop_col))[:,1]  #pull out the minority populations and convert them to a vector
     maj_vect = np.array(graph.node(data=maj_pop_col))[:,1]  #pull out the majority populations and convert them to a vector
