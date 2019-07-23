@@ -10,6 +10,8 @@ import pickle
 
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
+import itertools
 
 
 # BUILD GRAPH
@@ -58,3 +60,37 @@ nx.draw(graph, pos={x: x for x in graph.nodes()},
                     node_color=[cdict[graph.node[x]["MINPOP"]] for x in graph.nodes()],
                     node_size=80,
                     node_shape="o",)
+
+
+gr = graph
+
+print(nx.diameter(gr))
+
+node_scores = []
+r = 1/2
+a = 1/(((1-(r)**nx.diameter(gr))/(1-r))-1)
+
+for node in gr.nodes:
+   if gr.node[node]["MINPOP"] == 1:
+       dictionary_nodes = dict(nx.bfs_successors(gr,node))
+       dictionary_levels = {}
+       dictionary_levels[1] = dictionary_nodes[node]
+       current_list = [dictionary_nodes[x] for x in dictionary_levels[1] if x in dictionary_nodes.keys()]
+       i = 2
+       while current_list:
+           dictionary_levels[i] = list(itertools.chain.from_iterable(current_list))
+           current_list = [dictionary_nodes[x] for x in dictionary_levels[i] if x in dictionary_nodes.keys()]
+           i += 1
+       sum = 0
+       for key in dictionary_levels.keys():
+           values = dictionary_levels[key]
+           num_same = 0
+           for test_node in values:
+               if gr.node[test_node]["MINPOP"] == 1:
+                   num_same += 1
+           ratio = num_same / len(values)
+           sum += a*r**key
+       node_scores.append(sum)
+print(np.average(node_scores))
+
+print(a)
