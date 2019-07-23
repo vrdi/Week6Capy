@@ -41,30 +41,20 @@ dual_graph_list.append(graph)
 # The voter configuration called Henry :total
 for vertex in graph.nodes():
     # For 10 x 10 grid
-    Henry = [[1,1,0,0,0,0,0,0,1,1],[1,1,1,1,1,1,1,1,1,0],[0,1,0,0,0,1,1,1,0,0],[1,0,0,1,1,0,0,0,1,1],[0,0,1,1,1,1,1,0,1,0],[0,1,1,1,0,1,1,1,1,0],[0,1,0,0,0,1,0,1,1,1],[0,1,0,1,1,1,1,1,1,0],[0,1,1,1,0,0,1,1,1,0],[1,1,1,0,1,1,1,1,0,0]]
+    Henry = [[1,1,1,1,0,0,0,0,0,0],[1,1,1,1,0,0,0,0,0,0], [1,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1]]
     if Henry[9-vertex[1]][vertex[0]] == 0:
-        graph.node[vertex]["MINPOP"] = 1
-        graph.node[vertex]["MAJPOP"] = 0
-    else:
-        graph.node[vertex]["MINPOP"] = 0
-        graph.node[vertex]["MAJPOP"] = 1  
-
-dual_graph_list.append(graph)  
-        
-minorityvtxs = random.sample(graph.nodes(),40)        
-for vertex in graph.nodes():
-    if vertex in minorityvtxs:
-        graph.node[vertex]["MINPOP"] = 1
-        graph.node[vertex]["MAJPOP"] = 0
-    else:
         graph.node[vertex]["MINPOP"] = 0
         graph.node[vertex]["MAJPOP"] = 1
+    else:
+        graph.node[vertex]["MINPOP"] = 1
+        graph.node[vertex]["MAJPOP"] = 0 
 
-dual_graph_list.append(graph) 
+dual_graph_list.append(graph)  
+         
 
 cdict = {1: "gray", 0: "pink"}
 nx.draw(graph, pos={x: x for x in graph.nodes()}, 
                     node_color=[cdict[graph.node[x]["MINPOP"]] for x in graph.nodes()],
                     node_size=80,
                     node_shape="o",)
-
