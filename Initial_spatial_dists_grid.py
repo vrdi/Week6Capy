@@ -51,7 +51,8 @@ for vertex in graph.nodes():
 
 dual_graph_list.append(graph)  
         
-minorityvtxs = random.choice(graph.nodes(),40)        
+minorityvtxs = random.sample(graph.nodes(),40) 
+
 for vertex in graph.nodes():
     if vertex in minorityvtxs:
         graph.node[vertex]["MINPOP"] = 1
