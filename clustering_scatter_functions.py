@@ -101,7 +101,7 @@ def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_dis
 
 
 def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
-    adj_mat = nx.to_numpy_array(graph)
+    adj_mat = nx.to_numpy_array(graph, weight=None)
     min_vect = np.array(graph.node(data=min_pop_col))[:,1]  #pull out the minority populations and convert them to a vector
     maj_vect = np.array(graph.node(data=maj_pop_col))[:,1]  #pull out the majority populations and convert them to a vector
     edge_score = capy.edge(min_vect, maj_vect, adj_mat)
@@ -112,30 +112,3 @@ def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
     output["half_edge"] = half_edge_score
     
     return output
-
-
-graph = nx.grid_graph([10,10])
-
-
-for vertex in graph.nodes():
-    graph.node[vertex]["population"] = 1
-    graph.node[vertex]["pink"] = 0
-    graph.node[vertex]["purple"] = 1
-
-    
-for i in rnd.choice(range(len(graph.nodes)),size=40,replace=False):
-    vertex = list(graph.nodes)[i]
-    graph.node[vertex]["purple"] = 0
-    graph.node[vertex]["pink"] = 1
-    
-cdict = {1: "pink", 0: "purple"}
-
-plt.figure()
-nx.draw(
-    graph,
-    pos={x: x for x in graph.nodes()},
-    node_color=[cdict[graph.node[x]["pink"]] for x in graph.nodes()],
-    node_size=ns,
-    node_shape="s",
-)
-plt.show()
