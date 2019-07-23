@@ -9,6 +9,7 @@ import geopandas as gpd
 import pandas as pd
 import numpy as np
 import scipy
+import math
 
 import random
 
@@ -117,7 +118,6 @@ def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_dis
         min_seats_list.append(min_seats)
     
     return [cut_edges_list,min_seats_list,min_percents_list]
-    
 
 
 def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
@@ -143,3 +143,44 @@ def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
     output["half_edge"] = half_edge_score
     
     return output
+
+
+def randomly_populate_graph_fraction(graph, min_pop_col, maj_pop_col, minority_fraction, total_pop, tot_pop_col = None, no_empty_nodes = True):
+    num_minority = math.floor(minority_fraction*total_pop)
+    num_majority = math.ceil((1-minority_fraction)*total_pop)
+    return randomly_populate_graph(graph, min_pop_col, maj_pop_col, num_minority, num_majority, tot_pop_col, no_empty_nodes)
+    
+def randomly_populate_graph(graph, min_pop_col, maj_pop_col, num_minority, num_majority, tot_pop_col = None, no_empty_nodes = True):
+    total_pop = num_minority+num_majority
+    num_nodes = len(graph)
+    if no_empty_nodes and total_pop<num_nodes:
+        raise Exception("Combined majority and minority population too small to fill entire graph and no_empty_nodes was set to True")
+    
+    output_graph = graph.copy() #only a shallow copy, which should be sufficient for our purposes
+    pop_assignment_list = random.sample(num_majority*[0]+num_minority*[1],total_pop)
+    node_list = list(output_graph.nodes)
+    
+    for node in output_graph.nodes:
+        output_graph.nodes[node][min_pop_col] = 0
+        output_graph.nodes[node][maj_pop_col] = 0
+        
+    if no_empty_nodes:
+        shuffled_node_list = random.sample(node_list,num_nodes)
+        for node in shuffled_node_list:
+            if pop_assignment_list.pop() == 0:
+                output_graph.nodes[node][maj_pop_col] += 1
+            else:
+                output_graph.nodes[node][min_pop_col] += 1
+    
+    for person in pop_assignment_list:
+        node = random.choice(node_list)
+        if person == 0:
+            output_graph.nodes[node][maj_pop_col] += 1
+        else:
+            output_graph.nodes[node][min_pop_col] += 1
+    
+    if tot_pop_col is not None:
+        for node in output_graph.nodes:
+            output_graph.nodes[node][tot_pop_col] = output_graph.nodes[node][min_pop_col] + output_graph.nodes[node][maj_pop_col]
+    
+    return output_graph
