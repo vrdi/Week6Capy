@@ -7,11 +7,9 @@ import pickle
 
 # import matplotlib
 # matplotlib.use('Agg')
-
+import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
-import numpy as np
-import itertools
 
 
 # BUILD GRAPH
@@ -43,14 +41,15 @@ dual_graph_list.append(graph)
 # The voter configuration called Henry :total
 for vertex in graph.nodes():
     # For 10 x 10 grid
-    Henry = [[1,1,1,1,0,0,0,0,0,0],[1,1,1,1,0,0,0,0,0,0], [1,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1],[0,0,0,0,0,0,1,1,1,1],[0,0,0,0,0,0,1,1,1,1]]
+    Henry = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,0,0], 
+             [0,0,0,1,1,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
     if Henry[9-vertex[1]][vertex[0]] == 0:
         graph.node[vertex]["MINPOP"] = 0
         graph.node[vertex]["MAJPOP"] = 1
     else:
         graph.node[vertex]["MINPOP"] = 1
-        graph.node[vertex]["MAJPOP"] = 0 
+        graph.node[vertex]["MAJPOP"] = 0  
 
 dual_graph_list.append(graph)  
          
@@ -61,15 +60,17 @@ nx.draw(graph, pos={x: x for x in graph.nodes()},
                     node_size=80,
                     node_shape="o",)
 
-
 gr = graph
 
-print(nx.diameter(gr))
 
 node_scores = []
 r = 1/2
-a = 1/(((1-(r)**nx.diameter(gr))/(1-r))-1)
+diam = nx.diameter(gr)
+numerator = 1 - r**diam
+frac = numerator/(1-r) - 1
+a = 1/frac
 
+#a = 1/(((1-(r)**nx.diameter(gr))/((1-r)))-1)
 for node in gr.nodes:
    if gr.node[node]["MINPOP"] == 1:
        dictionary_nodes = dict(nx.bfs_successors(gr,node))
@@ -89,8 +90,11 @@ for node in gr.nodes:
                if gr.node[test_node]["MINPOP"] == 1:
                    num_same += 1
            ratio = num_same / len(values)
-           sum += a*r**key
+           #print(a*r**key)
+           sum += a*r**key*ratio
        node_scores.append(sum)
 print(np.average(node_scores))
 
-print(a)
+
+
+
