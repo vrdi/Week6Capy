@@ -96,7 +96,7 @@ for dg in dual_graph_list:
         min_percents_list = output[2] 
 
         print("Ran ensemble.")
-        """
+        
         # verify appropriate mixing time
         half_of_cut_edges = []
         for i in range (int(len(cut_edges_list)/2)):
@@ -115,14 +115,12 @@ for dg in dual_graph_list:
         plt.show()
         
         print('You are running', num_steps, 'steps.')
-        is_mixed = input('Is the appropriate mixing time met? (Y/N) ')
-        if(is_mixed == 'Y'):
-        """
-        if True:
+        is_mixed = input('Is the appropriate mixing time met? (y/n) ')
+        if(is_mixed == 'y'):
             print("Mixing time verified.")
             break
 
-        elif(is_mixed == 'N'):
+        elif(is_mixed == 'n'):
             num_steps = int(input('Reset number of steps for chain: '))
     
     """
