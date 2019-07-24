@@ -83,6 +83,9 @@ def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
     edge_score = capy.edge(min_vect, maj_vect, adj_mat)
     half_edge_score = capy.half_edge(min_vect, maj_vect, adj_mat)
     
+    print(min_vect)
+    print(maj_vect)
+
     output = {}
     output["edge"] = edge_score
     output["half_edge"] = half_edge_score
