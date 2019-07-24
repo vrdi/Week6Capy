@@ -6,6 +6,7 @@ import networkx as nx
 from networkx.readwrite import json_graph
 from gerrychain import Graph
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 
 import geopandas as gpd
 from random import randint, random
@@ -31,18 +32,22 @@ import os
 import json
 from clustering_scatter_functions import (
     run_ensemble_on_distro,
-    calculate_clustering_scores
+    calculate_clustering_scores,
+    randomly_populate_grid_fraction_one_per_node,
+    randomly_populate_grid_fraction,
+    randomly_populate_grid,
+    randomly_populate_graph_fraction,
+    randomly_populate_graph
 )
 
 import csv
 import pickle
 
 fileObject = open("10x10_100pernode_40percmin", 'rb')
-
 dual_graph_list = pickle.load(fileObject)
 
-points = []
 edge_score_list = []
+half_edge_score_list = []
 expected_min_seats_list = []
 
 num_states = 1
@@ -57,8 +62,10 @@ for dg in dual_graph_list:
     jgraph = Graph.from_json("ia_json.json")
     df = gpd.read_file(graph_path)
     """
-    cdict = {20: "pink", 100: "purple", 0: "hotpink", 70: "blue", 25: "green", 40: "black"}
+
+    """
     # Draws dual graph coloring nodes by their vote preference (minority/majority)
+    cdict = {20: "pink", 100: "purple", 0: "hotpink", 70: "blue", 25: "green", 40: "black"}
     plt.figure()
     nx.draw(
         dg,
@@ -68,6 +75,7 @@ for dg in dual_graph_list:
         node_shape="s",
     )
     plt.show()
+    """
 
     # set parameters for ensemble
     num_districts = 10
@@ -88,7 +96,7 @@ for dg in dual_graph_list:
         min_percents_list = output[2] 
 
         print("Ran ensemble.")
-
+        """
         # verify appropriate mixing time
         half_of_cut_edges = []
         for i in range (int(len(cut_edges_list)/2)):
@@ -105,25 +113,27 @@ for dg in dual_graph_list:
         plt.ylabel("frequency")
         plt.legend(loc='upper right')
         plt.show()
-
+        
         print('You are running', num_steps, 'steps.')
         is_mixed = input('Is the appropriate mixing time met? (Y/N) ')
-
         if(is_mixed == 'Y'):
+        """
+        if True:
             print("Mixing time verified.")
             break
 
         elif(is_mixed == 'N'):
             num_steps = int(input('Reset number of steps for chain: '))
     
+    """
     # plot number of minority seats in each step of chain
     plt.figure()
     plt.hist(min_seats_list, bins=20)
     plt.xlabel("# of minority seats")
     plt.ylabel("frequency")
     plt.show()
-    plt.savefig("./capy_hist.png")
     plt.close()
+    """
 
     # calculate clustering scores
     scores = calculate_clustering_scores(dg, min_pop_col, maj_pop_col, tot_pop_col)
@@ -142,15 +152,53 @@ for dg in dual_graph_list:
 
     # save edge scores and % expected minority seats
     edge_score_list.append(edge_score)
+    half_edge_score_list.append(half_edge_score)
     expected_min_seats_list.append(expected_min_seats)
     print("Edge scores and min seats saved.")
     print()
 
 #  plot edge score and expected minority seats
+slope1, intercept1, r_value1, p_value1, std_err1 = scipy.stats.linregress(edge_score_list, expected_min_seats_list)
+
+min1 = min(edge_score_list)
+max1 = max(edge_score_list)
+
+x1 = np.linspace(min1,max1,100)
+y1 = slope1 * x1 + intercept1
+
+print("edge score R^2:", r_value1**2)
+
 plt.figure()
 plt.scatter(edge_score_list, expected_min_seats_list)
+plt.plot(x1, y1, ':r')
 plt.xlabel("clustering edge score")
 plt.ylabel("percent expected minority seats")
-plt.show()
-plt.savefig("./capy_scatter.png")
+plt.savefig("./edge_score_plot.png")
 plt.close()
+
+#  plot half edge score and expected minority seats
+slope2, intercept2, r_value2, p_value2, std_err2 = scipy.stats.linregress(half_edge_score_list, expected_min_seats_list)
+
+min2 = min(edge_score_list)
+max2 = max(edge_score_list)
+
+x2 = np.linspace(min2,max2,100)
+y2 = slope2 * x2 + intercept2
+
+print("Half edge score R^2:", r_value2**2)
+
+plt.figure()
+plt.scatter(half_edge_score_list, expected_min_seats_list)
+plt.plot(x2, y2, ':r')
+plt.xlabel("clustering half edge score")
+plt.ylabel("percent expected minority seats")
+plt.savefig("./half_edge_score_plot.png")
+plt.close()
+
+statistics = pd.DataFrame({
+    "EDGE_SCORES": edge_score_list,
+    "HALF_EDGE_SCORES": half_edge_score_list,
+    "EXPECTED_MIN_SEATS": expected_min_seats_list
+})
+
+statistics.to_csv("clustering_statistics.csv", index=False)
