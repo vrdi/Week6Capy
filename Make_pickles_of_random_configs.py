@@ -18,8 +18,8 @@ dual_graph_list = []
 
 #Generate a random voter config on 10x10 grid 
 for i in range(100):
-    graph = randomly_populate_grid_fraction(10,10, "MINPOP", "MAJPOP", 0.2, 10000, "TOTPOP", )
-    dual_graph_list = []
+    graph = randomly_populate_grid_fraction(10,10, "MINPOP", "MAJPOP", 0.4, 10000, "TOTPOP", )
+    dual_graph_list.append(graph)
     
     '''
     for n in graph.nodes():
@@ -46,8 +46,8 @@ for i in range(100):
     )
     plt.show()'''
     
-
-file_Name = '10x10_random_10000totalpop_20percmin'
+print(len(dual_graph_list))
+file_Name = '10x10_random_10000totalpop_40percmin'
 fileObject = open(file_Name, 'wb')
 pickle.dump(dual_graph_list, fileObject)
 fileObject.close()
