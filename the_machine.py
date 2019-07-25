@@ -56,7 +56,14 @@ crapy_min_list = []
 crapy_maj_list = []
 expected_min_seats_list = []
 
-outdir = "./skeleton_outputs/"
+outdir = "./machine_outputs/"
+try:
+    # Create target Directory
+    os.mkdir(outdir)
+    print("Directory " , outdir ,  " created ") 
+except FileExistsError:
+    print("Directory " , outdir ,  " already exists")
+print()
 
 # iterate over states to be plotted
 for dg in dual_graph_list:
@@ -69,7 +76,6 @@ for dg in dual_graph_list:
     jgraph = Graph.from_json("ia_json.json")
     df = gpd.read_file(graph_path)
     """
-
     """
     # Draws dual graph coloring nodes by their vote preference (minority/majority)
     cdict = {20: "pink", 100: "purple", 0: "hotpink", 70: "blue", 25: "green", 40: "black"}
@@ -86,11 +92,11 @@ for dg in dual_graph_list:
 
     # set parameters for ensemble
     num_districts = 10
-    num_steps = 1000
+    num_steps = 100
     tot_pop_col = 'population'
     min_pop_col = 'purple'
     maj_pop_col = 'pink'
-    cddict = recursive_tree_part(dg, range(num_districts), 10, tot_pop_col, 0.001, 1)
+    cddict = {x: int(x[0])  for x in dg.nodes()}
     initial_plan = Partition(dg, cddict)
     print("Parameters set.")
     
@@ -184,12 +190,14 @@ x1 = np.linspace(min1,max1,100)
 y1 = slope1 * x1 + intercept1
 
 print("edge score R^2:", r_value1**2)
+label1 = 'R^2=' + str(r_value1**2)
 
 plt.figure()
 plt.scatter(edge_score_list, expected_min_seats_list)
-plt.plot(x1, y1, ':r')
+plt.plot(x1, y1, ':r', label=label1)
 plt.xlabel("clustering edge score")
 plt.ylabel("percent expected minority seats")
+plt.legend(loc='upper left')
 plt.savefig(outdir + "edge_score_plot.png")
 plt.close()
 
@@ -203,12 +211,14 @@ x2 = np.linspace(min2,max2,100)
 y2 = slope2 * x2 + intercept2
 
 print("Half edge score R^2:", r_value2**2)
+label2 = 'R^2=' + str(r_value2**2)
 
 plt.figure()
 plt.scatter(half_edge_score_list, expected_min_seats_list)
-plt.plot(x2, y2, ':r')
-plt.xlabel("clustering half edge score")
+plt.plot(x2, y2, ':r', label=label2)
+plt.xlabel("clustering half edge score") 
 plt.ylabel("percent expected minority seats")
+plt.legend(loc='upper left')
 plt.savefig(outdir + "half_edge_score_plot.png")
 plt.close()
 
@@ -222,12 +232,14 @@ x3 = np.linspace(min3,max3,100)
 y3 = slope3 * x3 + intercept3
 
 print("Morans I minority score R^2:", r_value3**2)
+label3 = 'R^2=' + str(r_value3**2)
 
 plt.figure()
 plt.scatter(morans_I_min_list, expected_min_seats_list)
-plt.plot(x3, y3, ':r')
+plt.plot(x3, y3, ':r', label=label3)
 plt.xlabel("morans I minority score")
 plt.ylabel("percent expected minority seats")
+plt.legend(loc='upper left')
 plt.savefig(outdir + "morans_I_min_score_plot.png")
 plt.close()
 
@@ -242,12 +254,14 @@ x4 = np.linspace(min4,max4,100)
 y4 = slope4 * x4 + intercept4
 
 print("Crapy minority score R^2:", r_value4**2)
+label4 = 'R^2=' + str(r_value4**2)
 
 plt.figure()
 plt.scatter(crapy_min_list, expected_min_seats_list)
-plt.plot(x4, y4, ':r')
+plt.plot(x4, y4, ':r', label=label4)
 plt.xlabel("crapy minority score")
 plt.ylabel("percent expected minority seats")
+plt.legend(loc='upper left')
 plt.savefig(outdir + "crapy_min_score_plot.png")
 plt.close()
 

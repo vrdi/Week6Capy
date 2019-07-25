@@ -1,0 +1,4 @@
+edge score R^2: 0.9184816342470253
+Half edge score R^2: 0.9227280038196601
+Morans I minority score R^2: 0.9212669408828589
+Crapy minority score R^2: 0.9332109010516934
