@@ -2,6 +2,7 @@ import networkx as nx
 import itertools
 import numpy as np
 
+#checking in about a git issue
 def crapy_one(gr, minority_attribute, majority_attribute, r = 1/2, weight_limit = None):
     node_scores_min = []
     node_scores_maj = []
