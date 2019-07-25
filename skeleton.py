@@ -43,14 +43,15 @@ from clustering_scatter_functions import (
 import csv
 import pickle
 
-fileObject = open("10x10_100pernode_40percmin", 'rb')
-dual_graph_list = pickle.load(fileObject)
+fileObject1 = open("10x10_PA_nodepop1_20percmin_expweight", 'rb')
+fileObject2 = open("10x10_PA_nodepop1_20percmin_multweight", 'rb')
+dual_graph_list = pickle.load(fileObject1) + pickle.load(fileObject2)
+print("Dual graph list generated.")
 
 edge_score_list = []
 half_edge_score_list = []
 expected_min_seats_list = []
 
-num_states = 1
 # iterate over states to be plotted
 for dg in dual_graph_list:
 
@@ -68,7 +69,7 @@ for dg in dual_graph_list:
     cdict = {20: "pink", 100: "purple", 0: "hotpink", 70: "blue", 25: "green", 40: "black"}
     plt.figure()
     nx.draw(
-        dg,
+        dg
         pos={x: x for x in dg.nodes()},
         node_color=[cdict[dg.node[x]["MINPOP"]] for x in dg.nodes()],
         node_size=50,
@@ -79,13 +80,13 @@ for dg in dual_graph_list:
 
     # set parameters for ensemble
     num_districts = 10
-    num_steps = 1000
-    tot_pop_col = 'TOTPOP'
-    min_pop_col = 'MINPOP'
-    maj_pop_col = 'MAJPOP'
-    cddict = recursive_tree_part(dg, range(num_districts), 1000, tot_pop_col, 0.001, 1)
+    num_steps = 10000
+    tot_pop_col = 'population'
+    min_pop_col = 'purple'
+    maj_pop_col = 'pink'
+    cddict = recursive_tree_part(dg, range(num_districts), 10, tot_pop_col, 0.001, 1)
     initial_plan = Partition(dg, cddict)
-    print("Set parameters.")
+    print("Parameters set.")
     
     while True:
         
@@ -177,8 +178,8 @@ plt.close()
 #  plot half edge score and expected minority seats
 slope2, intercept2, r_value2, p_value2, std_err2 = scipy.stats.linregress(half_edge_score_list, expected_min_seats_list)
 
-min2 = min(edge_score_list)
-max2 = max(edge_score_list)
+min2 = min(half_edge_score_list)
+max2 = max(half_edge_score_list)
 
 x2 = np.linspace(min2,max2,100)
 y2 = slope2 * x2 + intercept2
