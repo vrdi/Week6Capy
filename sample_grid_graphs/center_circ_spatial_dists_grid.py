@@ -66,7 +66,7 @@ gr = graph
 node_scores = []
 r = 1/2
 diam = nx.diameter(gr)
-numerator = 1 - r**diam
+numerator = 1 - r**(diam + 1)
 frac = numerator/(1-r) - 1
 a = 1/frac
 
