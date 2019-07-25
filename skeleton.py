@@ -50,7 +50,13 @@ print("Dual graph list generated.")
 
 edge_score_list = []
 half_edge_score_list = []
+morans_I_min_list = []
+morans_I_maj_list =[]
+crapy_min_list = []
+crapy_maj_list
 expected_min_seats_list = []
+
+outdir = "./skeleton_outputs/"
 
 # iterate over states to be plotted
 for dg in dual_graph_list:
@@ -138,8 +144,16 @@ for dg in dual_graph_list:
     scores = calculate_clustering_scores(dg, min_pop_col, maj_pop_col, tot_pop_col)
     edge_score = scores["edge"]
     half_edge_score = scores["half_edge"]
+    morans_I_min_score = scores["morans_I_min"]
+    morans_I_maj_score = scores["morans_I_maj"]
+    crapy_min_score = scores["crapy_min"]
+    crapy_maj_score = scores["crapy_maj"]
     print('Edge score:', edge_score)
     print('Half edge score:', half_edge_score)
+    print('Morans I minority:', morans_I_min_score)
+    print('Morans I majority:', morans_I_maj_score)
+    print('Crapy minority:', crapy_min_score)
+    print('Crapy majority:', crapy_maj_score)
 
     # calculate % expected minority seats
     # (assumes 1 seat per district)
@@ -153,7 +167,11 @@ for dg in dual_graph_list:
     edge_score_list.append(edge_score)
     half_edge_score_list.append(half_edge_score)
     expected_min_seats_list.append(expected_min_seats)
-    print("Edge scores and min seats saved.")
+    morans_I_min_list.append(morans_I_min_score)
+    morans_I_maj_list.append(morans_I_maj_score)
+    crapy_min_list.append(crapy_min_score)
+    crapy_maj_list.append(crapy_maj_score)
+    print("Clustering scores and min seats saved.")
     print()
 
 #  plot edge score and expected minority seats
@@ -172,7 +190,7 @@ plt.scatter(edge_score_list, expected_min_seats_list)
 plt.plot(x1, y1, ':r')
 plt.xlabel("clustering edge score")
 plt.ylabel("percent expected minority seats")
-plt.savefig("./edge_score_plot.png")
+plt.savefig(outdir + "edge_score_plot.png")
 plt.close()
 
 #  plot half edge score and expected minority seats
@@ -191,13 +209,56 @@ plt.scatter(half_edge_score_list, expected_min_seats_list)
 plt.plot(x2, y2, ':r')
 plt.xlabel("clustering half edge score")
 plt.ylabel("percent expected minority seats")
-plt.savefig("./half_edge_score_plot.png")
+plt.savefig(outdir + "half_edge_score_plot.png")
+plt.close()
+
+# plot morans I minority and expected minority seats
+slope3, intercept3, r_value3, p_value3, std_err3 = scipy.stats.linregress(morans_I_min_list, expected_min_seats_list)
+
+min3 = min(morans_I_min_list)
+max3 = max(morans_I_min_list)
+
+x3 = np.linspace(min3,max3,100)
+y3 = slope3 * x3 + intercept3
+
+print("Morans I minority score R^2:", r_value3**2)
+
+plt.figure()
+plt.scatter(morans_I_min_list, expected_min_seats_list)
+plt.plot(x3, y3, ':r')
+plt.xlabel("morans I minority score")
+plt.ylabel("percent expected minority seats")
+plt.savefig(outdir + "morans_I_min_score_plot.png")
+plt.close()
+
+# plot crapy minority and expected minority seats
+
+slope4, intercept4, r_value4, p_value4, std_err4 = scipy.stats.linregress(crapy_min_list, expected_min_seats_list)
+
+min4 = min(crapy_min_list)
+max4 = max(crapy_min_list)
+
+x4 = np.linspace(min4,max4,100)
+y4 = slope4 * x4 + intercept4
+
+print("Crapy minority score R^2:", r_value4**2)
+
+plt.figure()
+plt.scatter(crapy_min_list, expected_min_seats_list)
+plt.plot(x4, y4, ':r')
+plt.xlabel("crapy minority score")
+plt.ylabel("percent expected minority seats")
+plt.savefig(outdir + "crapy_min_score_plot.png")
 plt.close()
 
 statistics = pd.DataFrame({
     "EDGE_SCORES": edge_score_list,
     "HALF_EDGE_SCORES": half_edge_score_list,
     "EXPECTED_MIN_SEATS": expected_min_seats_list
+    "MORANS_I_MIN": morans_I_min_list,
+    "MORANS_I_MAJ": morans_I_maj_list,
+    "CRAPY_MIN_SCORES": crapy_min_list,
+    "CRAPY_MAJ_SCORES": crapy_maj_list
 })
 
-statistics.to_csv("clustering_statistics.csv", index=False)
+statistics.to_csv(outdir + "clustering_statistics.csv", index=False)
