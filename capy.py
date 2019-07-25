@@ -215,7 +215,8 @@ def smart_symmetric_matrix_sum(A):
 def morans_I(x, A):
   n = float(len(x))
   E = smart_symmetric_matrix_sum(A)
-  v = x - np.average(x)
+  avg = np.sum(x)/len(x)
+  v = x - avg
   # (v^TAv)
   r_num = float(np.dot(v.T, np.dot((A), v)))
   # (v^Tv)
