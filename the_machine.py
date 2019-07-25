@@ -53,7 +53,7 @@ half_edge_score_list = []
 morans_I_min_list = []
 morans_I_maj_list =[]
 crapy_min_list = []
-crapy_maj_list
+crapy_maj_list = []
 expected_min_seats_list = []
 
 outdir = "./skeleton_outputs/"
@@ -86,7 +86,7 @@ for dg in dual_graph_list:
 
     # set parameters for ensemble
     num_districts = 10
-    num_steps = 10000
+    num_steps = 1000
     tot_pop_col = 'population'
     min_pop_col = 'purple'
     maj_pop_col = 'pink'
@@ -254,7 +254,7 @@ plt.close()
 statistics = pd.DataFrame({
     "EDGE_SCORES": edge_score_list,
     "HALF_EDGE_SCORES": half_edge_score_list,
-    "EXPECTED_MIN_SEATS": expected_min_seats_list
+    "EXPECTED_MIN_SEATS": expected_min_seats_list,
     "MORANS_I_MIN": morans_I_min_list,
     "MORANS_I_MAJ": morans_I_maj_list,
     "CRAPY_MIN_SCORES": crapy_min_list,
