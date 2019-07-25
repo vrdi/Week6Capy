@@ -35,9 +35,7 @@ from gerrychain import (
 )
 from functools import partial
 import capy
-
-
-
+import crapy
 
 # =================== Functions to run ensembles on population distributions and calculate clustering scores  ===================
 
@@ -117,17 +115,24 @@ def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
     tot_pop_col (string) -- the key/column name for the total population attribute in graph
     
     Returns:
-    output (dict) -- dictionary where the keys are the names of clustering scores as strings (currently the options are "edge" and "half_edge") and the value for a key is the evaluation of the specified clustering score on the graph and its population distribution
+    output (dict) -- dictionary where the keys are the names of clustering scores as strings (currently the options are "edge", "half_edge", "morans_I_min", "morans_I_maj", and "crapy") and the value for a key is the evaluation of the specified clustering score on the graph and its population distribution
     """
     adj_mat = nx.to_numpy_array(graph, weight=None)
     min_vect = np.array(graph.node(data=min_pop_col))[:,1]  #pull out the minority populations and convert them to a vector
     maj_vect = np.array(graph.node(data=maj_pop_col))[:,1]  #pull out the majority populations and convert them to a vector
     edge_score = capy.edge(min_vect, maj_vect, adj_mat)
     half_edge_score = capy.half_edge(min_vect, maj_vect, adj_mat)
+    morans_I_min = capy.morans_I(min_vect, adj_mat)
+    morans_I_maj = capy.morans_I(maj_vect, adj_mat)
+    crapy_min, crapy_maj = crapy(graph, min_pop_col, maj_pop_col)
 
     output = {}
     output["edge"] = edge_score
     output["half_edge"] = half_edge_score
+    output["morans_I_min"] = morans_I_min
+    output["morans_I_maj"] = morans_I_maj
+    output["crapy_min"] = crapy_min
+    output["crapy_maj"] = crapy_maj
     
     return output
 
