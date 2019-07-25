@@ -1,8 +1,7 @@
 import networkx as nx
 import itertools
 import numpy as np
-
-def crapy(gr, r = 1/2, weight_limit = None):
+def crapy(gr, minority_attribute, majority_attribute, r = 1/2, weight_limit = None):
     node_scores_min = []
     node_scores_maj = []
     diam = nx.diameter(gr)
@@ -10,7 +9,7 @@ def crapy(gr, r = 1/2, weight_limit = None):
     frac = numerator/(1-r) - 1
     a = 1/frac    
     for node in gr.nodes:
-        node_info = gr.node[node]["MINPOP"]
+        node_info = gr.node[node][minority_attribute]
         dictionary_nodes = dict(nx.bfs_successors(gr,node))
         dictionary_levels = {}
         current_list = [dictionary_nodes[node]]
@@ -26,7 +25,7 @@ def crapy(gr, r = 1/2, weight_limit = None):
             values = dictionary_levels[key]
             num_same = 0
             for test_node in values:
-                if gr.node[test_node]["MINPOP"] == node_info:
+                if gr.node[test_node][minority_attribute] == node_info:
                     num_same += 1
             ratio = num_same / len(values)
             sum_weight += a*r**key*ratio
@@ -36,5 +35,7 @@ def crapy(gr, r = 1/2, weight_limit = None):
                 node_scores_maj.append(sum_weight)
     minority_score = np.average(node_scores_min)
     majority_score = np.average(node_scores_maj)
-    print("Minority Average: {0}".format(minority_score))
-    print("Majority Average: {0}".format(majority_score))
+    #print("Minority Average: {0}".format(minority_score))
+    #print("Majority Average: {0}".format(majority_score))
+    return minority_score, majority_score
+    
