@@ -105,7 +105,7 @@ def run_ensemble_on_distro(graph, min_pop_col, maj_pop_col, tot_pop_col, num_dis
     return [cut_edges_list,min_seats_list,min_percents_list]
 
 
-def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
+def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col, r, zero_neighbors, weight_limit):
     """Returns a dictionary of various clustering scores for given graph with a given minority/majority population distribution
     
     Parameters:
@@ -124,7 +124,7 @@ def calculate_clustering_scores(graph, min_pop_col, maj_pop_col, tot_pop_col):
     half_edge_score = capy.half_edge(min_vect, maj_vect, adj_mat)
     morans_I_min = capy.morans_I(min_vect, adj_mat)
     morans_I_maj = capy.morans_I(maj_vect, adj_mat)
-    crapy_min, crapy_maj = crapy.crapy(graph, min_pop_col, maj_pop_col)
+    crapy_min, crapy_maj = crapy.crapy_zero_neighbors(graph, min_pop_col, maj_pop_col, r, zero_neighbors, weight_limit)
 
     output = {}
     output["edge"] = edge_score

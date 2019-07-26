@@ -43,9 +43,9 @@ from clustering_scatter_functions import (
 import csv
 import pickle
 
-fileObject1 = open("10x10_PA_nodepop1_20percmin_expweight", 'rb')
-fileObject2 = open("10x10_PA_nodepop1_20percmin_multweight", 'rb')
-dual_graph_list = pickle.load(fileObject1) + pickle.load(fileObject2)
+fileObject1 = open("10x10_PA_nodepop1_40percmin_expweight", 'rb')
+fileObject2 = open("10x10_PA_nodepop1_40percmin_multweight", 'rb')
+dual_graph_list = pickle.load(fileObject1) #+ pickle.load(fileObject2)
 print("Dual graph list generated.")
 
 edge_score_list = []
@@ -64,6 +64,20 @@ try:
 except FileExistsError:
     print("Directory " , outdir ,  " already exists")
 print()
+
+default = input("Do you want to go with default values for r, zero neighbor, and weight limit? (y/n): ")
+if default == 'y':
+    r = 0.5
+    zero_neighbors = 0
+    weight_limit = None
+elif default == 'n':
+    r = float(input("Set decay parameter for weights (default 1/2): "))
+    zero_neighbors = float(input("Set zero neighbor ratio (default 0): "))
+    weight_limit = input("Set integer weight limit (radius of neighbors to check for each node), or none (default none): ")
+    if weight_limit != "none":
+        weight_limit = int(weight_limit)
+    else:
+        weight_limit = None
 
 # iterate over states to be plotted
 for dg in dual_graph_list:
@@ -129,12 +143,13 @@ for dg in dual_graph_list:
         
         print('You are running', num_steps, 'steps.')
         is_mixed = input('Is the appropriate mixing time met? (y/n) ')
-        if(is_mixed == 'y'):
+        if(is_mixed == 'y' or is_mixed == 'Y' or is_mixed == 'yes' or is_mixed == 'YES'):
             print("Mixing time verified.")
             break
 
-        elif(is_mixed == 'n'):
+        else:
             num_steps = int(input('Reset number of steps for chain: '))
+
     
     """
     # plot number of minority seats in each step of chain
@@ -147,7 +162,7 @@ for dg in dual_graph_list:
     """
 
     # calculate clustering scores
-    scores = calculate_clustering_scores(dg, min_pop_col, maj_pop_col, tot_pop_col)
+    scores = calculate_clustering_scores(dg, min_pop_col, maj_pop_col, tot_pop_col, r, zero_neighbors, weight_limit)
     edge_score = scores["edge"]
     half_edge_score = scores["half_edge"]
     morans_I_min_score = scores["morans_I_min"]
