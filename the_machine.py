@@ -42,12 +42,24 @@ from clustering_scatter_functions import (
 
 import csv
 import pickle
+import cv2
 
-fileObject1 = open("10x10_PA_nodepop1_40percmin_expweight", 'rb')
-fileObject2 = open("10x10_PA_nodepop1_40percmin_multweight", 'rb')
-dual_graph_list = pickle.load(fileObject1) #+ pickle.load(fileObject2)
+def hist_intersect(hist1, hist2, bins):
+    bins = np.diff(bins)
+    intersect = 0
+    whole = 0
+    for i in range (len(bins)):
+        intersect += min(bins[i]*hist1[i], bins[i]*hist2[i])
+        whole += max(bins[i]*hist1[i], bins[i]*hist2[i])
+    return intersect/whole
+
+fileObject1 = open("10x10_PA_nodepop100_20percmin_expweight_10dgs", 'rb')
+fileObject2 = open("10x10_PA_nodepop100_20percmin_multweight_10dgs", 'rb')
+dual_graph_list = pickle.load(fileObject2)
 print("Dual graph list generated.")
 
+intersect_list = []
+num_steps_list = []
 edge_score_list = []
 half_edge_score_list = []
 morans_I_min_list = []
@@ -56,7 +68,7 @@ crapy_min_list = []
 crapy_maj_list = []
 expected_min_seats_list = []
 
-outdir = "./machine_outputs/"
+outdir = "./test_outputs/"
 try:
     # Create target Directory
     os.mkdir(outdir)
@@ -103,19 +115,23 @@ for dg in dual_graph_list:
     )
     plt.show()
     """
+    graph_num = str(dual_graph_list.index(dg))
+    print("Processing graph " + graph_num + ".")
 
-    # set parameters for ensemble
+    # set initial parameters for ensemble
     num_districts = 10
-    num_steps = 100
+    num_steps = 5000
     tot_pop_col = 'population'
-    min_pop_col = 'purple'
-    maj_pop_col = 'pink'
+    min_pop_col = 'minority'
+    maj_pop_col = 'majority'
     cddict = {x: int(x[0])  for x in dg.nodes()}
     initial_plan = Partition(dg, cddict)
     print("Parameters set.")
     
     while True:
         
+        print('Running ensemble at', num_steps, 'steps.')
+
         # run ensemble and store outputs
         output = run_ensemble_on_distro(dg, min_pop_col, maj_pop_col, tot_pop_col, num_districts, initial_plan, num_steps) 
         cut_edges_list = output[0]
@@ -132,25 +148,35 @@ for dg in dual_graph_list:
 
         minimum = min(cut_edges_list)
         maximum = max(cut_edges_list)
-
         bins = np.linspace(minimum, maximum, maximum - minimum + 1)
-        plt.hist(cut_edges_list, bins, alpha=0.5, label='all steps in chain')
-        plt.hist(half_of_cut_edges, bins, alpha=0.5, label='first 1/2 of steps')
-        plt.xlabel("# of cut edges")
-        plt.ylabel("frequency")
-        plt.legend(loc='upper right')
-        plt.show()
-        
-        print('You are running', num_steps, 'steps.')
-        is_mixed = input('Is the appropriate mixing time met? (y/n) ')
-        if(is_mixed == 'y' or is_mixed == 'Y' or is_mixed == 'yes' or is_mixed == 'YES'):
+
+        hist1, bins1, patches1 = plt.hist(cut_edges_list, bins, alpha=0.5, label='all steps in chain')
+        hist2, bins2, patches2 = plt.hist(half_of_cut_edges, bins, alpha=0.5, label='first 1/2 of steps')
+
+        intersect = hist_intersect(hist1, hist2, bins)
+        print('Intersection:', intersect)
+
+        if(intersect >= 0.95):
             print("Mixing time verified.")
+
+            plt.xlabel("# of cut edges")
+            plt.ylabel("frequency")
+            plt.legend(loc='upper right')
+            plt.savefig(outdir + "mix_hist_" + graph_num + ".png")
+            plt.close()
+
+            intersect_list.append(intersect)
+            num_steps_list.append(num_steps)
+
+            print("Intersection score, number of steps, and cut-edge histogram saved.")
+
             break
 
         else:
-            num_steps = int(input('Reset number of steps for chain: '))
-
-    
+            plt.close()
+            num_steps = num_steps * 2
+            print("Mixing time insufficient, rerunning at", num_steps, "steps.")
+ 
     """
     # plot number of minority seats in each step of chain
     plt.figure()
@@ -281,6 +307,8 @@ plt.savefig(outdir + "crapy_min_score_plot.png")
 plt.close()
 
 statistics = pd.DataFrame({
+    "INTERSECTIONS": intersect_list,
+    "NUM_STEPS": num_steps_list,
     "EDGE_SCORES": edge_score_list,
     "HALF_EDGE_SCORES": half_edge_score_list,
     "EXPECTED_MIN_SEATS": expected_min_seats_list,
